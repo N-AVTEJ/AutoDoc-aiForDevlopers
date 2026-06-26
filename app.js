@@ -362,7 +362,7 @@ function updateStatusBar() {
     if (free.count >= 5) {
       setStatus(`✦ Free limit reached — add your key for unlimited`, 'idle');
     } else {
-      setStatus(`✦ ${free.count} of 5 free docs used today`, 'idle');
+      setStatus(`✦ ${5 - free.count} free docs available today — no key needed`, 'idle');
     }
   }
 }

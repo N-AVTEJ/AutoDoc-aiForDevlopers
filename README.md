@@ -1,5 +1,9 @@
 # AutoDoc AI 🚀
 
+[![JavaScript](https://img.shields.io/badge/JavaScript-48.9%25-f7df1e?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![CSS](https://img.shields.io/badge/CSS-27.7%25-1572b6?style=flat&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![HTML](https://img.shields.io/badge/HTML-23.4%25-e34c26?style=flat&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+
 > Paste code or pull from GitHub → get professional documentation + bug analysis in seconds. Supports multiple LLM providers (Anthropic, OpenAI, Gemini).
 
 ---

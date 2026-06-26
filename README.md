@@ -60,6 +60,3 @@ You can use any of the following providers. Open the **API Key** panel in the na
 - **APIs**: Direct browser-access integrations with Anthropic Messages API, OpenAI Chat Completions, and Gemini Developer API.
 - **Typography**: Google Fonts (Syne + DM Sans + JetBrains Mono).
 
----
-
-Built for the AI Hackathon for Builders — GL Bajaj Institute of Management and Research

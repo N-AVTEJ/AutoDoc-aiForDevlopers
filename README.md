@@ -94,17 +94,7 @@ Configure any of the following providers in the **API Key** panel in the navigat
 
 ---
 
-## 📝 License
-
-Built for the AI Hackathon for Builders — GL Bajaj Institute of Management and Research
-
-<<<<<<< HEAD
-=======
----
-
 <div align="center">
   
 **Made with ❤️ for developers**
 
-</div>
->>>>>>> b02ec1b45d2fe8efaaeecaabcdedc4b3c2b60cb0

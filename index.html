@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoDoc AI — Smart Code Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span class="brand-name">AutoDoc <span class="brand-accent">AI</span></span>
+      <span class="brand-tag">Hackathon Edition</span>
+    </div>
+    <div class="nav-right">
+      <div class="nav-stats" id="navStats" style="display:none">
+        <span class="nav-stat"><span id="totalDocs">0</span> docs</span>
+        <span class="nav-dot"></span>
+        <span class="nav-stat"><span id="totalIssues">0</span> bugs caught</span>
+      </div>
+
+      <!-- History Button -->
+      <button class="nav-btn" onclick="toggleHistory()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History
+        <span class="hist-count-badge" id="historyCount">0</span>
+      </button>
+
+      <!-- API Key Button -->
+      <button class="nav-btn nav-btn-key" onclick="document.getElementById('keyPanel').classList.toggle('open')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        API Key
+        <span id="keyStatus" style="font-size:10px;margin-left:2px;color:var(--text3)">No key</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- API Key Dropdown Panel -->
+  <div class="dropdown-panel" id="keyPanel">
+    <div class="dropdown-header">
+      <span class="dropdown-title" id="keyPanelTitle">API Key Configuration</span>
+      <button class="dropdown-close" onclick="document.getElementById('keyPanel').classList.remove('open')">✕</button>
+    </div>
+    
+    <div class="select-group" style="margin-bottom: 12px;">
+      <label>AI Provider</label>
+      <select id="apiProviderSelect" style="width: 100%; margin-top: 4px;" onchange="onProviderChange()">
+        <option value="anthropic">Anthropic Claude</option>
+        <option value="openai">OpenAI GPT</option>
+        <option value="gemini">Google Gemini</option>
+      </select>
+    </div>
+
+    <p class="dropdown-desc" id="keyPanelDesc">Your key is stored only in your browser (localStorage). Never sent anywhere except directly to Anthropic's API.</p>
+    <div class="key-row">
+      <input type="password" id="apiKeyInput" class="key-input" placeholder="sk-ant-api03-..." oninput="onApiKeyChange()" />
+      <button class="key-toggle" id="toggleKeyBtn" onclick="toggleKeyVisibility()">Show</button>
+    </div>
+    <div class="key-hint" id="keyHint">Get your key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a></div>
+  </div>
+
+  <!-- History Sliding Panel -->
+  <div class="history-panel" id="historyPanel">
+    <div class="history-header">
+      <span class="history-title">History</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="hist-clear-btn" onclick="clearHistory()">Clear all</button>
+        <button class="dropdown-close" onclick="toggleHistory(false)">✕</button>
+      </div>
+    </div>
+    <div id="historyEmpty" class="history-empty">No history yet. Generate some docs first.</div>
+    <div id="historyList" class="history-list"></div>
+  </div>
+
+  <main class="main">
+    <section class="hero">
+      <h1 class="hero-title">Document code.<br /><span class="hero-accent">Catch bugs.</span><br />Ship faster.</h1>
+      <p class="hero-sub">Paste code or pull from GitHub. Get docs + bug analysis in seconds.</p>
+    </section>
+
+    <div class="workspace">
+
+      <div class="gh-bar">
+        <svg class="gh-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        <input type="text" id="ghUrl" class="gh-input" placeholder="https://github.com/user/repo/blob/main/app.py — or paste code below" />
+        <button class="gh-btn" onclick="fetchGithub()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Fetch
+        </button>
+      </div>
+
+      <div class="controls-row">
+        <div class="select-group">
+          <label>Language</label>
+          <select id="lang">
+            <option>Python</option><option>JavaScript</option><option>TypeScript</option>
+            <option>Java</option><option>Go</option><option>Rust</option><option>C++</option>
+          </select>
+        </div>
+        <div class="select-group">
+          <label>Output format</label>
+          <select id="fmt">
+            <option value="docstring">Docstring / JSDoc</option>
+            <option value="readme">README section</option>
+            <option value="inline">Inline comments</option>
+            <option value="api">API reference</option>
+          </select>
+        </div>
+        <div class="select-group">
+          <label>Model</label>
+          <select id="modelSelect">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <button class="run-btn" id="runBtn" onclick="generate()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generate Docs + Analyse
+        </button>
+        <button class="export-btn" id="exportBtn" onclick="exportMd()" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export .md
+        </button>
+      </div>
+
+      <div class="split-view">
+        <div class="panel panel-before">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="panel-dot dot-red"></span><span class="panel-dot dot-yellow"></span><span class="panel-dot dot-green"></span>
+              <span class="panel-label">before.py</span>
+            </div>
+            <span class="panel-badge badge-before">Raw code</span>
+          </div>
+          <textarea id="codeIn" class="code-editor" spellcheck="false" placeholder="# Paste your undocumented code here…
+
+def calculate_discount(price, rate, max_discount=None):
+    if rate < 0 or rate > 1:
+        raise ValueError('Rate must be between 0 and 1')
+    discount = price * rate
+    if max_discount:
+        discount = min(discount, max_discount)
+    return price - discount"></textarea>
+          <div id="charCount" class="char-counter">0 / 50,000 characters</div>
+        </div>
+        <div class="split-divider">
+          <div class="arrow-right">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </div>
+        <div class="panel panel-after">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="panel-dot dot-red"></span><span class="panel-dot dot-yellow"></span><span class="panel-dot dot-green"></span>
+              <span class="panel-label">after.py</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="panel-badge badge-after">Documented</span>
+              <button class="copy-btn" id="copyBtn" onclick="copyOut()" style="display:none">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+          <div id="outArea" class="code-output">
+            <div class="output-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;margin-bottom:12px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              <p>Documentation appears here</p>
+              <p style="font-size:12px;opacity:0.5;margin-top:4px;">Add your API key, paste code, click Generate</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-bar" id="statsBar" style="display:none">
+        <div class="stat-card"><span class="stat-value" id="sLines">—</span><span class="stat-label">Lines added</span></div>
+        <div class="stat-card"><span class="stat-value" id="sTime">—</span><span class="stat-label">Time taken</span></div>
+        <div class="stat-card"><span class="stat-value" id="sCov">—</span><span class="stat-label">Doc coverage</span></div>
+        <div class="stat-card stat-card-issues"><span class="stat-value" id="sIssues">—</span><span class="stat-label">Issues found</span></div>
+      </div>
+
+      <div class="issues-panel" id="issuesPanel" style="display:none">
+        <div class="issues-header">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Code Analysis — Bugs &amp; Security Issues
+        </div>
+        <div id="issuesList"></div>
+      </div>
+
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Ready — add your API key and paste code to begin</span>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>AutoDoc AI</span>
+    <span class="footer-dot">·</span>
+    <span>Built for AI Hackathon — GL Bajaj Institute</span>
+    <span class="footer-dot">·</span>
+    <span>Powered by Claude, GPT &amp; Gemini</span>
+  </footer>
+
+  <div class="modal-overlay" id="limitModal">
+    <div class="modal-box">
+      <div class="modal-title">Daily limit reached</div>
+      <div class="modal-body">You've used all 5 free docs for today. Add your own API key for unlimited access, or come back tomorrow.</div>
+      <div class="modal-actions">
+        <button class="modal-btn-secondary" onclick="document.getElementById('limitModal').classList.remove('open')">Come back tomorrow</button>
+        <button class="modal-btn-primary" onclick="document.getElementById('limitModal').classList.remove('open'); document.getElementById('keyPanel').classList.add('open')">Add API Key →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="serverQuotaModal">
+    <div class="modal-box">
+      <div class="modal-title">Server busy</div>
+      <div class="modal-body">Our free tier is experiencing high demand right now. Add your own API key to continue without limits.</div>
+      <div class="modal-actions">
+        <button class="modal-btn-secondary" onclick="document.getElementById('serverQuotaModal').classList.remove('open')">Try again later</button>
+        <button class="modal-btn-primary" onclick="document.getElementById('serverQuotaModal').classList.remove('open'); document.getElementById('keyPanel').classList.add('open')">Add API Key →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="keyExhaustedModal">
+    <div class="modal-box">
+      <div class="modal-title">API key limit reached</div>
+      <div id="keyExhaustedBody" class="modal-body">Your API key has run out of credits or hit its rate limit. Please top up your account or switch to a different provider.</div>
+      <div class="modal-actions">
+        <button class="modal-btn-secondary" onclick="document.getElementById('keyExhaustedModal').classList.remove('open')">OK</button>
+        <button class="modal-btn-primary" onclick="document.getElementById('keyExhaustedModal').classList.remove('open'); document.getElementById('keyPanel').classList.add('open')">Switch Provider</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="invalidKeyModal">
+    <div class="modal-box">
+      <div class="modal-title">Invalid API key</div>
+      <div id="invalidKeyBody" class="modal-body">Your API key was rejected. Please check it's correct and has not expired.</div>
+      <div class="modal-actions">
+        <button class="modal-btn-secondary" onclick="document.getElementById('invalidKeyModal').classList.remove('open')">OK</button>
+        <button class="modal-btn-primary" onclick="document.getElementById('invalidKeyModal').classList.remove('open'); document.getElementById('keyPanel').classList.add('open')">Update Key →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
